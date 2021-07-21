@@ -40,7 +40,7 @@ namespace SerialPortUtility
                 {
                     if (GUILayout.Button(string.Format("{0} ({1})",dev.portName, dev.skip)))
                     {
-                        spapObject.PortService = dev.devType;
+                        spapObject.portService = dev.devType;
                         spapObject.Skip = dev.skip;
                     }
                 }

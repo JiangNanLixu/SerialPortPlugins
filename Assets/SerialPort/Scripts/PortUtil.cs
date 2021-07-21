@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SerialPortUtility
 {
@@ -136,7 +137,7 @@ namespace SerialPortUtility
             }
             catch
             {
-                throw new UnportException(string.Format("未找到服务<color=yellow>[{0}]</color>可用串口!", devType.ToString()));
+                throw new UnportException(string.Format("当前服务<color=yellow>[{0}]</color>不可用!", devType.ToString()));
             }
 
             return devices;
@@ -154,15 +155,15 @@ namespace SerialPortUtility
             try
             {
                 List<PortDevice> portLists = GetPortServiceListAvailable(devType);
-                if (index <= portLists.Count)
+                if (index < portLists.Count)
                 {
                     portName = portLists[index].portName;
                     return true;
                 }
             }
-            catch
+            catch(UnportException exception)
             {
-                throw new UnportException(string.Format("未找到服务<color=yellow>[{0}]</color>可用串口!", devType.ToString())); ;
+                Debug.LogError(exception.Message); 
             }
 
             return false;

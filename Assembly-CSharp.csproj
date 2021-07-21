@@ -70,13 +70,13 @@
     <Compile Include="Assets\SerialPort\Scripts\UnportException.cs" />
     <Compile Include="Assets\SerialPort\Scripts\Utility.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>E:/Works/Unity/- Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>E:/Works/Unity/Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>E:/Works/Unity/- Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>E:/Works/Unity/Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>E:/Works/Unity/- Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>E:/Works/Unity/Plugins/SerialPortPlugins/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>D:/Program Files/Unity3d/2018.4.30f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>

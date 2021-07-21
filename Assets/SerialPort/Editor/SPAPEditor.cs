@@ -111,7 +111,7 @@ namespace SerialPortUtility.Editor
                 string portName = string.Empty;
                 try
                 {
-                    PortUtil.GetPortName(obj.Skip, out portName, obj.PortService);
+                    PortUtil.GetPortName(obj.Skip, out portName, obj.portService);
                 }
                 catch { }
 
@@ -122,7 +122,7 @@ namespace SerialPortUtility.Editor
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 EditorGUILayout.LabelField("Open Configure", EditorStyles.boldLabel);
 
-                obj.PortService = (SerialPortUtility.PortService)EditorGUILayout.EnumPopup("Port Service", obj.PortService);
+                obj.portService = (SerialPortUtility.PortService)EditorGUILayout.EnumPopup("Port Service", obj.portService);
                 obj.IsAutoOpen = EditorGUILayout.Toggle("Auto Open", obj.IsAutoOpen);
 
                 obj.Skip = EditorGUILayout.IntField("Order (Default:0)", obj.Skip);
@@ -162,77 +162,77 @@ namespace SerialPortUtility.Editor
                 
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 EditorGUILayout.LabelField("Read Data Structure", EditorStyles.boldLabel);
-                obj.ReadProtocol = (SerialPortUtilityPro.MethodSystem)EditorGUILayout.EnumPopup("Read Protocol", obj.ReadProtocol);
+                obj.dataLayout = (SerialPortUtilityPro.DataLayout)EditorGUILayout.EnumPopup("Read Protocol", obj.dataLayout);
                 EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginVertical(GUI.skin.box);
+                
 
-                if (string.IsNullOrEmpty(ParserTypeName.stringValue))
+                switch (obj.dataLayout)
                 {
-                    EditorGUILayout.HelpBox("Entrance procedure is invalid.", MessageType.Error);
-                }
-                else if (EditorApplication.isPlaying)
-                {
-                    EditorGUILayout.LabelField("Current Parser", obj.CurrentParser == null ? "None" : obj.CurrentParser.GetType().ToString());
-                }
-
-                EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
-                {
-                    GUILayout.Label("Available Procedures", EditorStyles.boldLabel);
-                    if (m_ParserTypeNames.Length > 0)
-                    {
-                        EditorGUILayout.BeginVertical("box");
+                    case SerialPortUtilityPro.DataLayout.Bytes:
+                        EditorGUILayout.BeginVertical(GUI.skin.box);
+                        if (string.IsNullOrEmpty(ParserTypeName.stringValue))
                         {
-                            foreach (string procedureTypeName in m_ParserTypeNames)
+                            EditorGUILayout.HelpBox("Current Parser is invalid.", MessageType.Error);
+                        }
+                        else if (EditorApplication.isPlaying)
+                        {
+                            EditorGUILayout.LabelField("Current Parser", obj.CurrentParser == null ? "None" : obj.CurrentParser.GetType().ToString());
+                        }
+                        EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
+                        {
+                            GUILayout.Label("Available Parsers", EditorStyles.boldLabel);
+                            if (m_ParserTypeNames.Length > 0)
                             {
-                                bool selected = m_CurrentAvailableParserTypeNames.Contains(procedureTypeName);
-                                if (selected != EditorGUILayout.ToggleLeft(procedureTypeName, selected))
+                                EditorGUILayout.BeginVertical("box");
                                 {
-                                    if (!selected)
+                                    foreach (string procedureTypeName in m_ParserTypeNames)
                                     {
-                                        m_CurrentAvailableParserTypeNames.Add(procedureTypeName);
-                                        WriteAvailableProcedureTypeNames();
-                                    }
-                                    else if (procedureTypeName != ParserTypeName.stringValue)
-                                    {
-                                        m_CurrentAvailableParserTypeNames.Remove(procedureTypeName);
-                                        WriteAvailableProcedureTypeNames();
+                                        bool selected = m_CurrentAvailableParserTypeNames.Contains(procedureTypeName);
+                                        if (selected != EditorGUILayout.ToggleLeft(procedureTypeName, selected))
+                                        {
+                                            if (!selected)
+                                            {
+                                                m_CurrentAvailableParserTypeNames.Add(procedureTypeName);
+                                                WriteAvailableProcedureTypeNames();
+                                            }
+                                            else if (procedureTypeName != ParserTypeName.stringValue)
+                                            {
+                                                m_CurrentAvailableParserTypeNames.Remove(procedureTypeName);
+                                                WriteAvailableProcedureTypeNames();
+                                            }
+                                        }
                                     }
                                 }
+                                EditorGUILayout.EndVertical();
+                            }
+                            else
+                            {
+                                EditorGUILayout.HelpBox("There is no available procedure.", MessageType.Warning);
+                            }
+
+                            if (m_CurrentAvailableParserTypeNames.Count > 0)
+                            {
+                                EditorGUILayout.Separator();
+
+                                int selectedIndex = EditorGUILayout.Popup("Parser", m_ParserIndex, m_CurrentAvailableParserTypeNames.ToArray());
+                                if (selectedIndex != m_ParserIndex)
+                                {
+                                    m_ParserIndex = selectedIndex;
+                                    ParserTypeName.stringValue = m_CurrentAvailableParserTypeNames[selectedIndex];
+                                }
+                            }
+                            else
+                            {
+                                EditorGUILayout.HelpBox("Select available procedures first.", MessageType.Info);
                             }
                         }
+                        EditorGUI.EndDisabledGroup();
                         EditorGUILayout.EndVertical();
-                    }
-                    else
-                    {
-                        EditorGUILayout.HelpBox("There is no available procedure.", MessageType.Warning);
-                    }
-
-                    if (m_CurrentAvailableParserTypeNames.Count > 0)
-                    {
-                        EditorGUILayout.Separator();
-
-                        int selectedIndex = EditorGUILayout.Popup("Parser", m_ParserIndex, m_CurrentAvailableParserTypeNames.ToArray());
-                        if (selectedIndex != m_ParserIndex)
-                        {
-                            m_ParserIndex = selectedIndex;
-                            ParserTypeName.stringValue = m_CurrentAvailableParserTypeNames[selectedIndex];
-                        }
-                    }
-                    else
-                    {
-                        EditorGUILayout.HelpBox("Select available procedures first.", MessageType.Info);
-                    }
-                }
-                EditorGUI.EndDisabledGroup();
-
-                switch (obj.ReadProtocol)
-                {
+                        break;
                     default:
                         break;
-                }
-
-                EditorGUILayout.EndVertical();
+                }        
             }
             
             if (obj.IsOpened())

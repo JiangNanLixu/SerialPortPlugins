@@ -26,8 +26,10 @@ public class DataReciever : MonoBehaviour
 
     public void Recv(object obj)
     {
-        MindData mind = obj as MindData;
+        //MindData mind = obj as MindData;
 
-        recieverText.text = mind.sig + " " + mind.att + " " + mind.med;
+        //recieverText.text = mind.sig + " " + mind.att + " " + mind.med;
+
+        recieverText.text = Time.time + " " + (obj as string);
     }
 }

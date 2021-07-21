@@ -36,7 +36,7 @@ namespace SerialPortUtility
             public int Skip;
         }
 
-        public enum MethodSystem
+        public enum DataLayout
         {
             Bytes = 0,
             String,
@@ -46,8 +46,8 @@ namespace SerialPortUtility
 
         #region Params
         public bool IsAutoOpen = true;
-        public PortService PortService = PortService.CH341SER_A64;
-        public MethodSystem ReadProtocol = MethodSystem.Bytes;
+        public PortService portService = PortService.CH341SER_A64;
+        public DataLayout dataLayout = DataLayout.Bytes;
 
         [SerializeField]
         private string[] AvailableParserTypeNames = null;
@@ -136,19 +136,22 @@ namespace SerialPortUtility
         // Start is called before the first frame update
         void Start()
         {
-            Type parserType = Utility.Assembly.GetType(ParserTypeName);
-            if (parserType == null)
+            if (dataLayout == DataLayout.Bytes)
             {
-                Debug.LogErrorFormat("Can not find procedure type '{0}'.", ParserTypeName);
-                return;
-            }
+                Type parserType = Utility.Assembly.GetType(ParserTypeName);
+                if (parserType == null)
+                {
+                    Debug.LogErrorFormat("Can not find procedure type '{0}'.", ParserTypeName);
+                    return;
+                }
 
-            CurrentParser = (IParser)Activator.CreateInstance(parserType, new object[] { this });
+                CurrentParser = (IParser)Activator.CreateInstance(parserType, new object[] { this });
 
-            if (CurrentParser == null)
-            {
-                Debug.LogError("Entrance procedure is invalid.");
-                return;
+                if (CurrentParser == null)
+                {
+                    Debug.LogError("Entrance procedure is invalid.");
+                    return;
+                }
             }
             
             Connect();
@@ -173,21 +176,18 @@ namespace SerialPortUtility
             IsErrFinished = false;
 
             SpupConfig config;
-            config.PortService = PortService;
+            config.PortService = portService;
             config.BaudRate = BaudRate;
             config.Parity = Parity;
             config.DataBit = DataBit;
             config.StopBits = StopBit;
             config.Skip = Skip;
 
-            try
+            FindAvaliablePort = PortUtil.GetPortName(config.Skip, out _portName, config.PortService);
+            if (!FindAvaliablePort)
             {
-                FindAvaliablePort = PortUtil.GetPortName(config.Skip, out _portName, config.PortService);
-            }
-            catch(UnportException exception)
-            {
-                Debug.LogError("<color=red>" + exception.Message + "</color>");
                 SerialPortHandle = SPAPHANDLE_UNFIND;
+
                 SystemEventFire("UNFIND");
                 Invoke("Connect", 3);
 
@@ -281,14 +281,15 @@ namespace SerialPortUtility
             {
                 try
                 {
-                    switch (ReadProtocol)
+                    switch (dataLayout)
                     {
-                        case MethodSystem.Bytes:
+                        case DataLayout.Bytes:
                             ReadBytes();
                             break;
-                        case MethodSystem.String:
+                        case DataLayout.String:
+                            ReadString();
                             break;
-                        case MethodSystem.CharArray:
+                        case DataLayout.CharArray:
                             break;
                         default:
                             break;
@@ -302,6 +303,8 @@ namespace SerialPortUtility
                         Debug.LogWarning("Exception: " + ioe.Message + " StackTrace: " + ioe.StackTrace);
                         CloseDevice();
                         SystemEventFire("EDISCONNECTED");
+
+                        Loom.QueueOnMainThread(() => Connect());
                     }
                     break;
                 }
@@ -334,7 +337,18 @@ namespace SerialPortUtility
         /// <summary>
         /// 读取字符串
         /// </summary>
-        private void ReadString() { }
+        private void ReadString()
+        {
+            try
+            {
+                string message = _serialPort.ReadLine();
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    ReadEventFire(message);
+                }
+            } catch { }
+        }
         /// <summary>
         /// 读取字符数组
         /// </summary>
